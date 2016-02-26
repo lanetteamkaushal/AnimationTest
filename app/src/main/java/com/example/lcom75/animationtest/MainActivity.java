@@ -1,6 +1,7 @@
 package com.example.lcom75.animationtest;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -20,13 +21,17 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     ImageView iv1;
+    int image_level = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,29 +50,61 @@ public class MainActivity extends AppCompatActivity {
         });
         iv1 = (ImageView) findViewById(R.id.iv1);
         iv1.setImageResource(R.drawable.image_lavel);
+
         ObjectAnimator imageViewObjectAnimator = ObjectAnimator.ofFloat(iv1,
                 "rotation", 0f, 360f);
-        imageViewObjectAnimator.setInterpolator(new DecelerateInterpolator());
+        imageViewObjectAnimator.setInterpolator(new LinearInterpolator());
         imageViewObjectAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        imageViewObjectAnimator.setDuration(3000);
-//        imageViewObjectAnimator.start();
-        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(iv1, "alpha", 1f, 0.5f);
-        alphaAnimator.setInterpolator(new AccelerateInterpolator(4f));
-        alphaAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        alphaAnimator.setDuration(3000);
-        alphaAnimator.setStartDelay(2000);
-        alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        imageViewObjectAnimator.setDuration(900);
+        imageViewObjectAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float alpha = (float) animation.getAnimatedValue("alpha");
-                Log.e(TAG, "Alpha :" + alpha);
+            public void onAnimationRepeat(Animator animation) {
+                Log.e(TAG, "In Repeat mode" + image_level);
+                iv1.setImageLevel(image_level % 4);
+                super.onAnimationRepeat(animation);
+                image_level++;
+                if(image_level>200){
+                    animation.cancel();
+                }
             }
         });
+//        ObjectAnimator image2Animator = ObjectAnimator.ofFloat(iv1,
+//                "rotation", 2f, 360f);
+//        image2Animator.setInterpolator(new LinearInterpolator());
+////        image2Animator.setRepeatCount(ValueAnimator.INFINITE);
+//        image2Animator.setDuration(1000);
+//        image2Animator.addListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationRepeat(Animator animation) {
+//                Log.e(TAG, "In Repeat mode Image 2:" + image_level);
+//                iv1.setImageLevel(image_level % 4);
+//                super.onAnimationRepeat(animation);
+//                image_level++;
+//            }
+//        });
+        imageViewObjectAnimator.start();
+//        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(iv1, "alpha", 1f, 0.5f);
+//        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(iv1, "scaleX", 5f);
+//        alphaAnimator.setInterpolator(new MyInterpolar(0.8f));
+//        alphaAnimator.set
+//        alphaAnimator.setRepeatCount(ValueAnimator.INFINITE);
+//        alphaAnimator.setDuration(3000);
+//        alphaAnimator.setStartDelay(2000);
+//        alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animation) {
+//                float alpha = (float) animation.getAnimatedValue("alpha");
+//                Log.e(TAG, "Alpha :" + alpha);
+//            }
+//        });
 
 //        alphaAnimator.start();
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.play(imageViewObjectAnimator).with(alphaAnimator);
-        animatorSet.start();
+//        AnimatorSet animatorSet = new AnimatorSet();
+//        ArrayList<Animator> animators = new ArrayList<>();
+//        animators.add(imageViewObjectAnimator);
+//        animators.add(image2Animator);
+//        animatorSet.playSequentially(animators);//.with(alphaAnimator);
+//        animatorSet.start();
 //        AnimationSet animationSet = new AnimationSet(true);
 //        final Animation animator1 = AnimationUtils.loadAnimation(this, R.anim.rotate_1);
 //        final Animation animator2 = AnimationUtils.loadAnimation(this, R.anim.rotate_1);
@@ -204,5 +241,21 @@ public class MainActivity extends AppCompatActivity {
 ////            }
 ////        });
 ////        v.startAnimation(anim_out);
+    }
+
+    public class MyInterpolar extends AccelerateInterpolator {
+        public MyInterpolar(float factor) {
+            super(factor);
+        }
+
+        @Override
+        public float getInterpolation(float input) {
+            float op = 0;
+            if (input > 0.69) {
+                op = super.getInterpolation(input);
+            }
+            Log.d(TAG, "we are returning :" + input + ":" + op);
+            return op;
+        }
     }
 }
